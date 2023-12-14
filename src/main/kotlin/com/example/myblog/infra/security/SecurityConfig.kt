@@ -3,6 +3,7 @@ package com.example.myblog.infra.security
 import com.example.myblog.infra.security.jwt.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
@@ -34,6 +35,9 @@ class SecurityConfig(
                     "/v3/api-docs/**",
                     "/h2/**"
                 ).permitAll()
+                    .requestMatchers(
+                        HttpMethod.GET,"/api/posts/**",
+                    ).permitAll()
                     .anyRequest().authenticated()
             }
             //안넣으면 안타네

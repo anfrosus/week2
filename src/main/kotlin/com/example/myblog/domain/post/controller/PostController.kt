@@ -6,18 +6,21 @@ import com.example.myblog.domain.post.dto.PostRequestDto
 import com.example.myblog.domain.post.dto.PostResponseDto
 import com.example.myblog.domain.post.service.PostService
 import com.example.myblog.infra.security.UserPrincipal
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "게시글")
 @RequestMapping("/api/posts")
 @RestController
 class PostController(
     private val postService: PostService
 ) {
 
-    //전체 조회
+    @Operation(summary = "목록 조회")
     @GetMapping
     fun getPostList(): ResponseEntity<List<PostResponseDto>> {
         return ResponseEntity
@@ -25,7 +28,7 @@ class PostController(
             .body(postService.getAllPostList())
     }
 
-    //단건 조회
+    @Operation(summary = "게시글 조회")
     @GetMapping("/{postId}")
     fun getPost(@PathVariable postId: Long): ResponseEntity<PostResponseDto> {
         return ResponseEntity
@@ -33,7 +36,7 @@ class PostController(
             .body(postService.getPostById(postId))
     }
 
-    //게시글 작성
+    @Operation(summary = "게시글 작성")
     @PostMapping
     fun createPost(
         @RequestBody postRequest: PostRequestDto,
@@ -44,7 +47,7 @@ class PostController(
             .body(postService.createPost(postRequest, userPrincipal))
     }
 
-    //수정
+    @Operation(summary = "게시글 수정")
     @PutMapping("/{postId}")
     fun updatePost(
         @PathVariable postId: Long,
@@ -56,7 +59,7 @@ class PostController(
             .body(postService.updatePost(postId, postRequest, userPrincipal))
     }
 
-    //삭제
+    @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
     fun deletePost(
         @PathVariable postId: Long,
@@ -67,7 +70,7 @@ class PostController(
             .body(postService.deletePost(postId, userPrincipal))
     }
 
-    //댓글 작성
+    @Operation(summary = "댓글 작성")
     @PostMapping("/{postId}/comments")
     fun createComment(
         @PathVariable postId: Long,
