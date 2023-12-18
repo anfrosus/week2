@@ -28,8 +28,6 @@ class PostService(
     @Transactional(readOnly = true)
     fun getAllPostList(): List<PostResponseDto> {
         var postList = postRepository.findAllPostFetchComment()
-        postList.reverse()
-        postList.map { it.commentList.reverse() }
         return postList.map { it.toResponse() }
     }
 

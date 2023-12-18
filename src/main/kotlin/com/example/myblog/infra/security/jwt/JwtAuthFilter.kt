@@ -48,7 +48,7 @@ class JwtAuthFilter(
                 //security Context 에 set
                 SecurityContextHolder.getContext().authentication = authentication
             }
-                .onFailure { TODO("실패시에는 어떤 exception 발생시키는지 확인하고 기간 만료시를 찾아내자") }
+                //.onFailure { TODO("실패시에는 어떤 exception 발생시키는지 확인하고 기간 만료시를 찾아내자") }
             
         }
         filterChain.doFilter(request, response)

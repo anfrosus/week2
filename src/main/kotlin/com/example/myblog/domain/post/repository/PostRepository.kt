@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface PostRepository : JpaRepository<Post, Long> {
     fun findAllByOrderByCreatedDateDesc(): List<Post>
-    @Query("select p from Post p left join fetch p.commentList")
+    @Query("select p from Post as p left join fetch p.commentList c order by p.createdDate desc, c.createdDate desc")
     fun findAllPostFetchComment(): MutableList<Post>
 
 //    @Query("select p from Post p left join fetch p.commentList c order by p.createdDate desc, c.createdDate desc")
