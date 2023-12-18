@@ -9,17 +9,18 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "users")
 class User(
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name", nullable = false, unique = true)
     var userName: String,
 
     @Column(name = "user_password", nullable = false)
     var password: String,
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    var postList: MutableList<Post> = mutableListOf(),
+//    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+//    var postList: MutableList<Post> = mutableListOf(),
+//
+//    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+//    var commentList: MutableList<Comment> = mutableListOf()
 
-    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    var commentList: MutableList<Comment> = mutableListOf()
 ) : TimeStamped() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

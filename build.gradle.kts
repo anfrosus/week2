@@ -32,8 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    //jdbc
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
     //swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
     //jwt
@@ -43,9 +42,10 @@ dependencies {
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    //h2
-    runtimeOnly("com.h2database:h2")
 
+    //h2
+//    runtimeOnly("com.h2database:h2")
+    runtimeOnly("org.postgresql:postgresql")
 
 
 

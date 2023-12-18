@@ -4,6 +4,7 @@ import com.example.myblog.domain.TimeStamped
 import com.example.myblog.domain.post.dto.CommentResponseDto
 import com.example.myblog.domain.user.model.User
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "comment")
@@ -19,7 +20,7 @@ class Comment(
     @JoinColumn(name = "user_id", nullable = false)
     var user: User,
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
     @JoinColumn(name = "post_id", nullable = false)
     var post: Post
 
@@ -27,6 +28,11 @@ class Comment(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id:Long? = null
+
+    init {
+        post.addComment(this)
+    }
+
 }
 
 fun Comment.toResponse() : CommentResponseDto{
@@ -34,6 +40,6 @@ fun Comment.toResponse() : CommentResponseDto{
         id = id!!,
         author = author,
         content = content,
-        createdAt = createdDate
+        createdAt = LocalDateTime.now()
     )
 }

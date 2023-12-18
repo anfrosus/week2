@@ -39,6 +39,7 @@ class UserService(
         return userRepository.save(newUser).toResponse()
     }
 
+    @Transactional(readOnly = true)
     fun login(loginRequest: LoginRequestDto, response: HttpServletResponse): UserResponseDto? {
         val user = userRepository.findUserByUserName(loginRequest.userName)
             ?: throw CustomException("user", ErrorCode.MODEL_NOT_FOUND)

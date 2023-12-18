@@ -30,7 +30,8 @@ class JwtAuthFilter(
     ) {
         val jwt = jwtPlugin.getTokenFromHeader(request)
         if (jwt != null) { //TODO : 어차피 인증필요하면 인증객체가 필요한데 토큰 없으면 인증객체 인증못해서 거기서 예외발생함
-            jwtPlugin.validateToken(jwt).onSuccess {
+            jwtPlugin.validateToken(jwt)
+                .onSuccess {
 
                 val principal = UserPrincipal(
                     id = it.body["uid"].toString().toLong(),
@@ -47,10 +48,11 @@ class JwtAuthFilter(
                 //security Context 에 set
                 SecurityContextHolder.getContext().authentication = authentication
             }
+                .onFailure { TODO("실패시에는 어떤 exception 발생시키는지 확인하고 기간 만료시를 찾아내자") }
             
         }
         filterChain.doFilter(request, response)
-        //TODO: 실패시에는 어떤 exception 발생시키는지 확인하고 기간 만료시를 찾아내자
+
     }
 
 

@@ -32,7 +32,7 @@ class JwtPlugin(
 
     //TODO: RESULT 클래스란? try catch 대신 사용했다고 하는데 잘 이해가 안간다.
     fun validateToken(accessToken: String): Result<Jws<Claims>> {
-        return kotlin.runCatching {
+        return runCatching {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
         }
     }
@@ -65,13 +65,13 @@ class JwtPlugin(
         val now = Instant.now()
 
         return Jwts.builder()
-            .setSubject("토큰 제목")
-            .setId("jti??")
+            .setSubject("토큰 대상(userID)")
+            .setId("jti 사용하자")
             .setIssuer("발급자")
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plus(expiration)))
 //            .claim("키1", "Value(Obj)")
-            .claim("uid", user.id)
+            .claim("uid", user.id) //TODO: subject에 담으면 될 듯.
             .claim("unm", user.userName)
             .addClaims(claims)
             .signWith(key)

@@ -29,6 +29,10 @@ class Post (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
+
+    fun addComment(comment: Comment){
+        commentList.add(comment)
+    }
 }
 
 fun Post.toResponse(): PostResponseDto {
@@ -38,6 +42,6 @@ fun Post.toResponse(): PostResponseDto {
         content = content,
         authorName = author,
         commentList = commentList.map { it.toResponse() },
-        createdAt = createdDate
+        createdAt = createdDate!!
     )
 }

@@ -25,13 +25,16 @@ class PostService(
 ) {
 
     //전체 조회
+    @Transactional(readOnly = true)
     fun getAllPostList(): List<PostResponseDto> {
-        var postList = postRepository.findAllByOrderByCreatedDateDesc()
+        var postList = postRepository.findAllPostFetchComment()
+        postList.reverse()
         postList.map { it.commentList.reverse() }
         return postList.map { it.toResponse() }
     }
 
     //단건 조회
+    @Transactional(readOnly = true)
     fun getPostById(postId: Long): PostResponseDto {
         val post = postRepository.findByIdOrNull(postId) ?: throw CustomException("post", ErrorCode.MODEL_NOT_FOUND)
         post.commentList.reverse()
@@ -41,8 +44,8 @@ class PostService(
     //게시글 작성
     @Transactional
     fun createPost(postRequestDto: PostRequestDto, userPrincipal: UserPrincipal): PostResponseDto {
-        val currentUser =
-            userRepository.findByIdOrNull(userPrincipal.id) ?: throw CustomException("user", ErrorCode.MODEL_NOT_FOUND)
+        val currentUser = userRepository.findByIdOrNull(userPrincipal.id)
+            ?: throw CustomException("user", ErrorCode.MODEL_NOT_FOUND)
         val post = Post(postRequestDto.title, postRequestDto.content, currentUser.userName, currentUser)
 
         return postRepository.save(post).toResponse()
@@ -59,7 +62,7 @@ class PostService(
 
         post.title = title
         post.content = content
-
+        
         return postRepository.save(post).toResponse()
     }
 
@@ -76,15 +79,16 @@ class PostService(
 
     @Transactional
     fun createComment(postId: Long, commentRequest: CommentRequestDto, userPrincipal: UserPrincipal): CommentResponseDto {
-        val post = postRepository.findByIdOrNull(postId) ?: throw CustomException("post", ErrorCode.MODEL_NOT_FOUND)
-        val user = userRepository.findByIdOrNull(userPrincipal.id) ?: throw CustomException("user", ErrorCode.MODEL_NOT_FOUND)
+        val post = postRepository.findByIdOrNull(postId)
+            ?: throw CustomException("post", ErrorCode.MODEL_NOT_FOUND)
+        val user = userRepository.findByIdOrNull(userPrincipal.id)
+            ?: throw CustomException("user", ErrorCode.MODEL_NOT_FOUND)
         var comment = Comment(
             content = commentRequest.content,
             author = user.userName,
             user = user,
             post = post
         )
-
         return commentRepository.save(comment).toResponse()
     }
 

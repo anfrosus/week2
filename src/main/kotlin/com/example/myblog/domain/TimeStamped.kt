@@ -3,6 +3,7 @@ package com.example.myblog.domain
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.OrderBy
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -14,8 +15,8 @@ abstract class TimeStamped {
 
     @CreatedDate
     @Column(updatable = false)
-    lateinit var createdDate : LocalDateTime
+    var createdDate : LocalDateTime? = null
 
     @LastModifiedDate
-    lateinit var modifiedDate: LocalDateTime
+    var modifiedDate: LocalDateTime? = null
 }
