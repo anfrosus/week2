@@ -5,12 +5,13 @@ import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 import java.io.Serializable
 
+
 class JwtAuthenticationToken(
     private val principal: UserPrincipal,
     //요청한 Adress 정보, SessionId 등을 담음(로깅 용도)
     details: WebAuthenticationDetails
-): AbstractAuthenticationToken(principal.authorities), Serializable {
-
+): AbstractAuthenticationToken(principal.authorities), Serializable {//ToDO:Serializable 이란?
+//Authentication 의 구현체를 상속
     init {
         //JWT 검증 성공 시 바로 생성할 예정이므로 생성시 authenticated 를 true로
         super.setAuthenticated(true)
@@ -27,6 +28,10 @@ class JwtAuthenticationToken(
     따라서 Authentication 객체에 principal 변수명으로 어떠한 객체를 만들어도 꺼내어 사용 가능하다는 뜻.*/
     //Authentication interface 자체가 getPrincipal, getCredentials, getDetails 라는 메소드를 가지고 있네
     //그런데 이제 그 구현체 중 하나인 AbstractAuthenticationToken 객체가 getDetails는 정의를 했고, 나머지 둘을 안해놨네
+    //그말은 principal 객체를 자유롭게 쓸 수 있다는 말.
     override fun getPrincipal() = principal
 
+    override fun isAuthenticated(): Boolean {
+        return true
+    }
 }

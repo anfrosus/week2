@@ -1,20 +1,21 @@
 package com.example.myblog.infra.security.jwt
 
+import com.example.myblog.domain.ApiEnum
+import com.example.myblog.infra.exception.CustomException
+import com.example.myblog.infra.exception.ErrorCode
 import com.example.myblog.infra.security.UserPrincipal
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication
-import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
-import org.springframework.security.web.context.DelegatingSecurityContextRepository
-import org.springframework.security.web.context.SecurityContextHolderFilter
-import org.springframework.security.web.context.SecurityContextRepository
-import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
@@ -23,37 +24,89 @@ class JwtAuthFilter(
     private val jwtPlugin: JwtPlugin
 ) : OncePerRequestFilter() {
 
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        //어찌됐건 간에 uri쭉 훑고 boolean만 리턴하면 돼
+        ApiEnum.entries.map {
+            if (it.api == request.requestURI && it.method.toString() == request.method){
+                return true
+            }
+        }
+        return false
+    }
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val jwt = jwtPlugin.getTokenFromHeader(request)
-        if (jwt != null) { //TODO : 어차피 인증필요하면 인증객체가 필요한데 토큰 없으면 인증객체 인증못해서 거기서 예외발생함
-            jwtPlugin.validateToken(jwt)
-                .onSuccess {
-
-                val principal = UserPrincipal(
-                    id = it.body["uid"].toString().toLong(),
-                    userName = it.body["unm"].toString(),
-                    authorities = mutableSetOf(SimpleGrantedAuthority(it.body["role"].toString()))
-                )
-
-                //유저 정보 획득 후 Authentication 객체생성
-                val authentication = JwtAuthenticationToken(
-                    principal = principal,
-                    details = WebAuthenticationDetailsSource().buildDetails(request)
-                )
-
-                //security Context 에 set
-                SecurityContextHolder.getContext().authentication = authentication
+        println("아니 이거 자체를 타면 안되는디?")
+//        val jwt = jwtPlugin.getTokenFromHeader(request)
+        jwtPlugin.getTokenFromHeader(request)
+            .onSuccess {token ->
+                jwtPlugin.validateToken(token)
+                    .onSuccess {claims ->
+                        setAuthentication(claims, request)
+//                        filterChain.doFilter(request, response)
+                    }
+                    .onFailure { exception ->
+                        if (exception is ExpiredJwtException) {
+//                            TODO("리프레쉬 토큰 재발급")
+//                            filterChain.doFilter(request, response)
+                        } else {
+                            filterExceptionHandler(exception, response)
+//                            filterChain.doFilter(request,response)
+                        }
+                    }
             }
-                //.onFailure { TODO("실패시에는 어떤 exception 발생시키는지 확인하고 기간 만료시를 찾아내자") }
-            
-        }
+            .onFailure {
+                //ToDO:
+                filterExceptionHandler(it, response)
+//                filterChain.doFilter(request, response)
+            }
+        println("마지막")
         filterChain.doFilter(request, response)
 
     }
+
+    private fun setAuthentication(claims: Jws<Claims>, request: HttpServletRequest) {
+
+        val principal = UserPrincipal(
+            id = claims.body["uid"].toString().toLong(),
+            userName = claims.body.subject,
+            roles = jwtPlugin.claimToSet(claims.body["rol"].toString())
+        )
+
+        //유저 정보 획득 후 Authentication 객체생성
+        val authentication = JwtAuthenticationToken(
+            principal = principal,
+            details = WebAuthenticationDetailsSource().buildDetails(request)
+        )
+
+        //security Context 에 set
+        SecurityContextHolder.getContext().authentication = authentication
+        //TODO:지우기
+        println("여기까지 잘타는겨?")
+        println(authentication.authorities)
+
+    }
+
+
+    private fun filterExceptionHandler(exception: Throwable, response: HttpServletResponse) {
+        response.status = HttpStatus.BAD_REQUEST.value()
+        response.contentType = MediaType.APPLICATION_JSON_VALUE
+        response.characterEncoding = "UTF-8"
+        if (exception is JwtException) {
+            response.writer.write(
+                ObjectMapper().writeValueAsString("또끈에 문제가 있어용 " + exception.message)
+            )
+        } else {
+            println("여기 타는감??")
+            response.writer.write(
+                ObjectMapper().writeValueAsString( "뭔지몰랑" + exception.message)
+            )
+        }
+    }
+
 
 
 }

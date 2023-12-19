@@ -3,6 +3,7 @@ package com.example.myblog.domain.user.model
 import com.example.myblog.domain.TimeStamped
 import com.example.myblog.domain.post.model.Comment
 import com.example.myblog.domain.post.model.Post
+import com.example.myblog.domain.user.UserRoleEnum
 import com.example.myblog.domain.user.dto.UserResponseDto
 import jakarta.persistence.*
 
@@ -14,6 +15,10 @@ class User(
 
     @Column(name = "user_password", nullable = false)
     var password: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role", nullable = false)
+    var role: UserRoleEnum
 
 //    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
 //    var postList: MutableList<Post> = mutableListOf(),
@@ -30,6 +35,7 @@ class User(
 fun User.toResponse(): UserResponseDto {
     return UserResponseDto(
         id = id!!,
-        userName = userName
+        userName = userName,
+        userRole = role.toString()
     )
 }

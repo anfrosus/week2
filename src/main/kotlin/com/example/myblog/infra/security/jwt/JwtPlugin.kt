@@ -30,7 +30,6 @@ class JwtPlugin(
 
     val key: SecretKey = Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8))
 
-    //TODO: RESULT 클래스란? try catch 대신 사용했다고 하는데 잘 이해가 안간다.
     fun validateToken(accessToken: String): Result<Jws<Claims>> {
         return runCatching {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
@@ -42,38 +41,51 @@ class JwtPlugin(
         setTokenAtHeaderWithBearer(response, generatedToken)
     }
 
-    fun getTokenFromHeader(request: HttpServletRequest): String? {
-        //Todo 필터 예외처리 ? 필터에 uri 안넣으면 널포인터 뜨는디 그러면 걍 null리턴하자
-        val bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION) ?: return null
-        return substringToken(bearerToken)
+    fun getTokenFromHeader(request: HttpServletRequest): Result<String> {
+//        val bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION) ?: return null
+//        return substringToken(bearerToken)
+        return kotlin.runCatching {
+            val bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION) ?: throw CustomException("null", ErrorCode.NOT_MATCH)
+            substringToken(bearerToken)
+        }
     }
+
 
     private fun substringToken(bearerToken: String): String {
         if (!bearerToken.startsWith(BEARER_PREFIX)) {
-            //ToDO 필터 예외처리
-            throw CustomException("auth", ErrorCode.NOT_MATCH)
+            throw CustomException("bearer", ErrorCode.NOT_MATCH)
         }
         return bearerToken.substring(7)
     }
 
+    fun claimToSet(inputString: String): Set<String> {
+        val result = inputString
+            .trim('[', ']')
+            .split(",")
+            .map { it.trim() }
+            .toSet()
+        return result
+    }
+
     private fun generateToken(user: User, expiration: Duration): String {
         //이것도 사실 claim 으로 넣으면 되긴 함
-        var mutableMap = mutableMapOf<String, Any>()
-        val claims: Claims = Jwts.claims(mutableMap)
-        claims["role"] = mutableSetOf("운영자", "관리자", "일반유저")
+//        var mutableMap = mutableMapOf<String, MutableSet<String>>()
+//        val claims: Claims = Jwts.claims(mutableMap)
+
+//        claims["role"] = mutableSetOf("운영자", "관리자", "일반유저")
 
         val now = Instant.now()
 
         return Jwts.builder()
-            .setSubject("토큰 대상(userID)")
             .setId("jti 사용하자")
             .setIssuer("발급자")
             .setIssuedAt(Date.from(now))
             .setExpiration(Date.from(now.plus(expiration)))
-//            .claim("키1", "Value(Obj)")
-            .claim("uid", user.id) //TODO: subject에 담으면 될 듯.
-            .claim("unm", user.userName)
-            .addClaims(claims)
+            .setSubject(user.userName)
+            //            .claim("키1", "Value(Obj)")
+            .claim("uid", user.id)
+            .claim("rol", mutableSetOf(user.role, "ADMIN"))
+//            .addClaims(claims)
             .signWith(key)
             .compact()
     }
@@ -81,6 +93,7 @@ class JwtPlugin(
     fun setTokenAtHeaderWithBearer(response: HttpServletResponse, token: String){
         response.setHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token)
     }
+
 
 
 }

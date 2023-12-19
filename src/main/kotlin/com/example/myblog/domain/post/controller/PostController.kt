@@ -5,11 +5,14 @@ import com.example.myblog.domain.post.dto.CommentResponseDto
 import com.example.myblog.domain.post.dto.PostRequestDto
 import com.example.myblog.domain.post.dto.PostResponseDto
 import com.example.myblog.domain.post.service.PostService
+import com.example.myblog.domain.user.UserRoleEnum
 import com.example.myblog.infra.security.UserPrincipal
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
@@ -17,9 +20,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/posts")
 @RestController
 class PostController(
-    private val postService: PostService
+    private val postService: PostService,
 ) {
-
     @Operation(summary = "목록 조회")
     @GetMapping
     fun getPostList(): ResponseEntity<List<PostResponseDto>> {
@@ -37,6 +39,8 @@ class PostController(
     }
 
     @Operation(summary = "게시글 작성")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+//    @Secured(UserRoleEnum.USER.name)
     @PostMapping
     fun createPost(
         @RequestBody postRequest: PostRequestDto,

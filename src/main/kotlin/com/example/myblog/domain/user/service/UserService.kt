@@ -1,5 +1,6 @@
 package com.example.myblog.domain.user.service
 
+import com.example.myblog.domain.user.UserRoleEnum
 import com.example.myblog.domain.user.dto.LoginRequestDto
 import com.example.myblog.domain.user.dto.UserRequestDto
 import com.example.myblog.domain.user.dto.UserResponseDto
@@ -34,7 +35,7 @@ class UserService(
 
         val userName = userRequest.userName
         val encodedPassword = passwordEncoder.encode(userRequest.password)
-        val newUser = User(userName, encodedPassword)
+        val newUser = User(userName, encodedPassword, UserRoleEnum.USER)
 
         return userRepository.save(newUser).toResponse()
     }
@@ -47,7 +48,8 @@ class UserService(
             throw CustomException("password", ErrorCode.NOT_MATCH)
         }
         jwtPlugin.generateAccessToken(user, response)
-        return UserResponseDto(user)
+
+        return user.toResponse()
 
     }
 }

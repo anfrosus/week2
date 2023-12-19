@@ -34,8 +34,10 @@ class PostService(
     //단건 조회
     @Transactional(readOnly = true)
     fun getPostById(postId: Long): PostResponseDto {
-        val post = postRepository.findByIdOrNull(postId) ?: throw CustomException("post", ErrorCode.MODEL_NOT_FOUND)
+        val post = postRepository.findPostByIdFetchComment(postId) ?: throw CustomException("post", ErrorCode.MODEL_NOT_FOUND)
         post.commentList.reverse()
+        //toResponse 자체를 commentList = commentList.reversed().map { it.toResponse() } 의 형태로 만들어도 되지만
+        //getAll fetch join 시 순서보장 문제로 인해 ..
         return post.toResponse()
     }
 
