@@ -20,12 +20,10 @@ class AuthenticationEntryPointException: AuthenticationEntryPoint {
         response: HttpServletResponse,
         authException: AuthenticationException
     ) {
-        println("엔투리포인투")
         response.status = HttpStatus.UNAUTHORIZED.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = "UTF-8"
         response.writer.write(
             ObjectMapper().writeValueAsString("엔투리포인투고요 " + authException.message))
-
     }
 }

@@ -10,7 +10,7 @@ class RefreshToken(
     @JoinColumn(name = "USER_ID")
     var user:User,
 
-    @Column(name = "TOKEN", nullable = false)
+    @Column(name = "TOKEN", nullable = false, columnDefinition = "TEXT")
     var tokenValue:String,
 
     @Column(name = "IS_USED", nullable = false)

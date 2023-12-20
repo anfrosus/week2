@@ -1,8 +1,6 @@
 package com.example.myblog.infra.security.jwt
 
 import com.example.myblog.domain.ApiEnum
-import com.example.myblog.infra.exception.CustomException
-import com.example.myblog.infra.exception.ErrorCode
 import com.example.myblog.infra.security.UserPrincipal
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.Claims
@@ -50,17 +48,22 @@ class JwtAuthFilter(
                     }
                     .onFailure { exception ->
                         if (exception is ExpiredJwtException) {
-//                            TODO("리프레쉬 토큰 재발급")
+                            filterExceptionHandler(exception, response)
+                            return
+//                            TODO("리프레쉬 토큰 재발급") 이렇게 할 필요없이 reissue api따로 두면되지
 //                            filterChain.doFilter(request, response)
                         } else {
                             filterExceptionHandler(exception, response)
+                            return
 //                            filterChain.doFilter(request,response)
                         }
                     }
             }
             .onFailure {
                 //ToDO:
+                println("여기 탔지?")
                 filterExceptionHandler(it, response)
+                return
 //                filterChain.doFilter(request, response)
             }
         println("마지막")
@@ -87,7 +90,6 @@ class JwtAuthFilter(
         //TODO:지우기
         println("여기까지 잘타는겨?")
         println(authentication.authorities)
-
     }
 
 

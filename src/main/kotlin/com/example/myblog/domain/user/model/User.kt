@@ -36,6 +36,16 @@ fun User.toResponse(): UserResponseDto {
     return UserResponseDto(
         id = id!!,
         userName = userName,
-        userRole = role.toString()
+        userRole = role.toString(),
+        refreshToken = null
+    )
+}
+
+fun User.toResponse(refreshToken: String): UserResponseDto {
+    return UserResponseDto(
+        id = id!!,
+        userName = userName,
+        userRole = role.toString(),
+        refreshToken = refreshToken
     )
 }

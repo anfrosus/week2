@@ -1,6 +1,6 @@
 package com.example.myblog.infra.security
 
-import com.example.myblog.domain.user.UserRoleEnum
+import com.example.myblog.domain.ApiEnum
 import com.example.myblog.infra.security.jwt.JwtAuthFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
@@ -17,7 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(securedEnabled = true)
 class SecurityConfig(
     private val jwtAuthFilter: JwtAuthFilter,
-    private val authenticationEntryPoint: AuthenticationEntryPoint
+    private val authenticationEntryPoint: AuthenticationEntryPoint,
+    private val accessDeniedHandler: AccessDeniedHandler
 ) {
 
 
@@ -37,11 +39,17 @@ class SecurityConfig(
                     "/api/users/signup",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/h2/**"
+                    "/h2/**",
+                    "/error"
+//                    "api/users/reissue"
                 ).permitAll()
-                it.requestMatchers(
-                    HttpMethod.GET, "/api/posts/**",
-                ).permitAll()
+                    .requestMatchers(
+                        ApiEnum.REISSUE.method, ApiEnum.REISSUE.api
+                    ).permitAll()
+//                    .requestMatchers(
+//                        HttpMethod.GET, "/api/posts/**",
+//                        ApiEnum.REISSUE.method, ApiEnum.REISSUE.api
+//                    ).permitAll()
 //                it.requestMatchers(
 //                    "api"
 //                ).hasRole(UserRoleEnum.ADMIN.toString())
@@ -53,6 +61,7 @@ class SecurityConfig(
 
             .exceptionHandling {
                 it.authenticationEntryPoint(authenticationEntryPoint)
+                it.accessDeniedHandler(accessDeniedHandler)
             }
 
             .headers { it.disable() } //for h2

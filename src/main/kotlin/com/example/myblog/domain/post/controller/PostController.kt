@@ -52,6 +52,8 @@ class PostController(
     }
 
     @Operation(summary = "게시글 수정")
+//    @PreAuthorize("hasRole('')")
+//    @Secured(UserRoleEnum.USER, UserRoleEnum.ADMIN)
     @PutMapping("/{postId}")
     fun updatePost(
         @PathVariable postId: Long,

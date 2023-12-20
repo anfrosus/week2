@@ -22,6 +22,8 @@ import javax.crypto.SecretKey
 class JwtPlugin(
     @Value("\${auth.jwt.secret.key}") private val secretKey: String,
     @Value("\${auth.jwt.exp}") private val accessTokenExpirationHour: Long,
+    //Todo
+    @Value("24")private val refreshTokenExpirationHour: Long
 ) {
 
     companion object {
@@ -39,6 +41,10 @@ class JwtPlugin(
     fun generateAccessToken(user: User, response: HttpServletResponse) {
         val generatedToken = generateToken(user, Duration.ofHours(accessTokenExpirationHour))
         setTokenAtHeaderWithBearer(response, generatedToken)
+    }
+
+    fun generateRefreshToken(user: User) : String {
+        return generateToken(user, Duration.ofHours(refreshTokenExpirationHour))
     }
 
     fun getTokenFromHeader(request: HttpServletRequest): Result<String> {
