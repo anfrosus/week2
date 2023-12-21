@@ -10,9 +10,9 @@ import com.example.myblog.domain.user.model.User
 import com.example.myblog.domain.user.model.toResponse
 import com.example.myblog.domain.user.repository.TokenRepository
 import com.example.myblog.domain.user.repository.UserRepository
+import com.example.myblog.infra.aop.StopWatch
 import com.example.myblog.infra.exception.CustomException
 import com.example.myblog.infra.exception.ErrorCode
-import com.example.myblog.infra.security.UserPrincipal
 import com.example.myblog.infra.security.jwt.JwtPlugin
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.data.repository.findByIdOrNull
@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+@StopWatch
 @Service
 class UserService(
     private val passwordEncoder: PasswordEncoder,
@@ -27,6 +28,7 @@ class UserService(
     private val tokenRepository: TokenRepository,
     private val jwtPlugin: JwtPlugin
 ) {
+
 
     @Transactional
     fun signUp(userRequest: UserRequestDto): UserResponseDto {

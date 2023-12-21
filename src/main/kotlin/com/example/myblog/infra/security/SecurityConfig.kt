@@ -15,7 +15,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
+@EnableMethodSecurity
+//@EnableMethodSecurity(securedEnabled = true) -> secured 사용할거라면 ...
 class SecurityConfig(
     private val jwtAuthFilter: JwtAuthFilter,
     private val authenticationEntryPoint: AuthenticationEntryPoint,
@@ -57,6 +58,8 @@ class SecurityConfig(
             }
             //jwtAuthFilter 추가
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+//            .authorizeHttpRequests { it.requestMatchers("").authenticated() }
+//            와 같이 설정가능
 //            .addFilterBefore(jwtExceptionFilter, JwtAuthFilter::class.java)
 
             .exceptionHandling {

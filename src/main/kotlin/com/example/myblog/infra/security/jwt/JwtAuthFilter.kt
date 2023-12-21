@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.access.ExceptionTranslationFilter
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
@@ -31,6 +33,7 @@ class JwtAuthFilter(
         }
         return false
     }
+
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -72,13 +75,16 @@ class JwtAuthFilter(
     }
 
     private fun setAuthentication(claims: Jws<Claims>, request: HttpServletRequest) {
-
+//        val userRole = claims.payload["rol"].toString()
+//        println(setOf(userRole))
         val principal = UserPrincipal(
-            id = claims.body["uid"].toString().toLong(),
-            userName = claims.body.subject,
-            roles = jwtPlugin.claimToSet(claims.body["rol"].toString())
-        )
 
+            id = claims.payload["uid"].toString().toLong(),
+            userName = claims.payload.subject,
+            roles = jwtPlugin.claimToSet(claims.payload["rol"].toString())
+//            roles = jwtPlugin.claimToSet(claims.body["rol"].toString())
+        )
+        println(jwtPlugin.claimToSet(claims.payload["rol"].toString()))
         //유저 정보 획득 후 Authentication 객체생성
         val authentication = JwtAuthenticationToken(
             principal = principal,
@@ -94,12 +100,17 @@ class JwtAuthFilter(
 
 
     private fun filterExceptionHandler(exception: Throwable, response: HttpServletResponse) {
-        response.status = HttpStatus.BAD_REQUEST.value()
+        response.status = HttpStatus.UNAUTHORIZED.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = "UTF-8"
         if (exception is JwtException) {
             response.writer.write(
-                ObjectMapper().writeValueAsString("또끈에 문제가 있어용 " + exception.message)
+                ObjectMapper().writeValueAsString(
+                    ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(exception.message)
+
+                )
             )
         } else {
             println("여기 타는감??")

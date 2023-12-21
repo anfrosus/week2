@@ -20,7 +20,7 @@ import javax.crypto.SecretKey
 
 @Component
 class JwtPlugin(
-    @Value("\${auth.jwt.secret.key}") private val secretKey: String,
+    @Value("\${auth.jwt.secret.key}") private val SECRET_KEY: String,
     @Value("\${auth.jwt.exp}") private val accessTokenExpirationHour: Long,
     //Todo
     @Value("24")private val refreshTokenExpirationHour: Long
@@ -30,11 +30,12 @@ class JwtPlugin(
         private const val BEARER_PREFIX = "Bearer "
     }
 
-    val key: SecretKey = Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8))
+    private val key: SecretKey = Keys.hmacShaKeyFor(SECRET_KEY.toByteArray(StandardCharsets.UTF_8))
 
     fun validateToken(accessToken: String): Result<Jws<Claims>> {
         return runCatching {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
+//            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken)
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(accessToken)
         }
     }
 
@@ -81,17 +82,18 @@ class JwtPlugin(
 //        claims["role"] = mutableSetOf("운영자", "관리자", "일반유저")
 
         val now = Instant.now()
+        Jwts.parser()
 
         return Jwts.builder()
-            .setId("jti 사용하자")
-            .setIssuer("발급자")
-            .setIssuedAt(Date.from(now))
-            .setExpiration(Date.from(now.plus(expiration)))
-            .setSubject(user.userName)
+            .id("jti 사용")
+            .issuer("발급자")
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plus(expiration)))
+            .subject(user.userName) //여기다 아이디 넣는게 나을듯
             //            .claim("키1", "Value(Obj)")
             .claim("uid", user.id)
             .claim("rol", mutableSetOf(user.role, "ADMIN"))
-//            .addClaims(claims)
+//            .claims(claims)
             .signWith(key)
             .compact()
     }

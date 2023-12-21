@@ -39,7 +39,7 @@ class PostController(
     }
 
     @Operation(summary = "게시글 작성")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('USER') or hasAuthority('ADMIN')")
 //    @Secured(UserRoleEnum.USER.name)
     @PostMapping
     fun createPost(
@@ -52,7 +52,7 @@ class PostController(
     }
 
     @Operation(summary = "게시글 수정")
-//    @PreAuthorize("hasRole('')")
+    @PreAuthorize("hasAuthority('NER')")
 //    @Secured(UserRoleEnum.USER, UserRoleEnum.ADMIN)
     @PutMapping("/{postId}")
     fun updatePost(

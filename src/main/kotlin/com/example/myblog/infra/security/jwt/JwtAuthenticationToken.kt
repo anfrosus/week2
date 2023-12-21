@@ -30,8 +30,4 @@ class JwtAuthenticationToken(
     //그런데 이제 그 구현체 중 하나인 AbstractAuthenticationToken 객체가 getDetails는 정의를 했고, 나머지 둘을 안해놨네
     //그말은 principal 객체를 자유롭게 쓸 수 있다는 말.
     override fun getPrincipal() = principal
-
-    override fun isAuthenticated(): Boolean {
-        return true
-    }
 }
